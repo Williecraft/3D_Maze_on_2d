@@ -91,6 +91,7 @@ class Game:
         
         self.draw_pic(screen_array, 1, self.wall_img)
         self.draw_pic(screen_array, 0, self.path_img)
+        self.draw_pic(screen_array, 3, self.start_img)
         self.draw_pic(screen_array, 2, self.start_img)
         self.draw_pic(screen_array, 9, self.end_img)
     
@@ -136,7 +137,7 @@ class Game:
                 next = self.cPos
                 if toUP or toRIGHT:
                     step = 0
-                    while step < SCALE:
+                    while step < SCALE-1:
                         last = next
                         next = self.cPos+self.getRightVector(step)*toRIGHT+(0, 0, step*toUP)
                         
@@ -162,6 +163,8 @@ class Game:
                         break
                     if step:
                         self.cPos = next
+                        if self.maze.array[tuple(next//SCALE)] == 0:
+                            self.maze.array[tuple(next//SCALE)] = 3
                         
             
             if not any((w, a, s, d, leftclick)) and rotate:   
@@ -178,7 +181,7 @@ class Game:
                 
             
             self.ScreenDraw()
-            pg.draw.rect(screen, "red", ((self.mid[0], self.mid[1], SCALE, SCALE)))
+            pg.draw.rect(screen, "red", ((self.mid[0]-SCALE//2, self.mid[1]-SCALE//2, SCALE, SCALE)))
             
             pg.display.update()
             CLOCK.tick(FPS)
