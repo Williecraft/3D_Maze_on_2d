@@ -21,7 +21,7 @@ CLOCK = pg.time.Clock()
 class Game:
     def get_pic(filename:str):
         screen_ratio = SCREEN_HEIGHT/SCREEN_WIDTH
-        pil_img = Image.open(fr"source/{filename}.png")
+        pil_img = Image.open(fr"resource/{filename}.png")
         img_ratio = pil_img.size[1]/pil_img.size[0]
 
         if screen_ratio > img_ratio:
@@ -41,6 +41,7 @@ class Game:
     path_img = get_pic("dirt_path")
     end_img = get_pic("diamond_block")
     start_img = get_pic("emerald_block")
+    grass_img = get_pic("grass_block")
     
     def __init__(self, screen:pg.Surface, lvl:int) -> None:
         self.screen = screen
@@ -90,8 +91,8 @@ class Game:
                     screen_array[x, y:y+SCALE] = self.maze.array[pArray]
         
         self.draw_pic(screen_array, 1, self.wall_img)
-        self.draw_pic(screen_array, 0, self.path_img)
-        self.draw_pic(screen_array, 3, self.start_img)
+        self.draw_pic(screen_array, 0, self.grass_img)
+        self.draw_pic(screen_array, 3, self.path_img)
         self.draw_pic(screen_array, 2, self.start_img)
         self.draw_pic(screen_array, 9, self.end_img)
     
