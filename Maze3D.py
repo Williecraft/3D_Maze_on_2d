@@ -52,7 +52,7 @@ class Maze:
                 else: break
                 
         # 迷宮陣列化
-        self.array = np.zeros((size*6+1, size*6+1, size*6+1), dtype='int32')
+        self.array = np.zeros((size*6+1, size*6+1, size*6+1), dtype=int)
         self.array[:, :, 0] = 1
         self.array[:, :, -1] = 1
         self.array[:, 0, :] = 1
@@ -69,10 +69,34 @@ class Maze:
                         self.array[i*6:i*6+7, j*6+6:j*6+7, k*6:k*6+7] = 1
                     if self.wall_info[(i, j, k)][2]:
                         self.array[i*6:i*6+7, j*6:j*6+7, k*6+6:k*6+7] = 1
-                        
-        self.array[1:6, 1:6, 1:6] = 2
-        self.array[6*(size-1)+1:size*6, 6*(size-1)+1:size*6, 6*(size-1):size*6] = 9
         
+        self.path = self.array.copy()
+                 
+        self.array[1:6, 1:6, 1:6] = 2
+        self.array[6*(size-1)+1:size*6, 6*(size-1)+1:size*6, 6*(size-1)+1:size*6] = 9
+        
+        self.path[self.path==1] = -1
+        self.path[(3, 3, 3)] = 1
+        
+        passed = np.zeros((size*6+1, size*6+1, size*6+1), dtype=bool)
+        def findpath(now):
+            if self.array[now] == 9: return True
+            
+            passed[now] = 1
+            for d in self.direction:
+                next = tuple((now[i]+d[i] for i in range(len(d))))
+                if [i%3 == 0 for i in next].count(True) >= 2 and all(0 <= i <= size*6 for i in next) and not passed[next] and self.path[next] == 0:
+                    self.path[next] = self.path[now]+1
+                    if findpath(next): return True
+                    self.path[next] = 0
+            return False
+        assert findpath((3, 3, 3)), "No answer"
+        
+            
+                    
+                
+            
+    
 if __name__ == '__main__':
     for i in range(2, 100):
         start = time.time()

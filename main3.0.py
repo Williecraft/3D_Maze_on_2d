@@ -43,9 +43,10 @@ class Game:
     start_img = get_pic("emerald_block")
     grass_img = get_pic("grass_block")
     
-    def __init__(self, screen:pg.Surface, lvl:int) -> None:
+    def __init__(self, screen:pg.Surface, lvl:int, showAns:bool = False) -> None:
         self.screen = screen
         self.lvl = lvl
+        self.showAns = showAns
         self.l = lvl*6+1
         self.maze = Maze(lvl)
         self.cPos = np.array([3*SCALE, 3*SCALE, 3*SCALE])
@@ -88,7 +89,10 @@ class Game:
                 y = self.mid[1]+int(z*SCALE-self.cPos[2])
                 
                 if (0 <= x < SCREEN_WIDTH and 0 <= y < SCREEN_HEIGHT):
-                    screen_array[x, y:y+SCALE] = self.maze.array[pArray]
+                    if self.maze.path[pArray] > 0:
+                        screen_array[x, y:y+SCALE] = 2
+                    else:
+                        screen_array[x, y:y+SCALE] = self.maze.array[pArray]
         
         self.draw_pic(screen_array, 1, self.wall_img)
         self.draw_pic(screen_array, 0, self.grass_img)
@@ -186,7 +190,8 @@ class Game:
             
             pg.display.update()
             CLOCK.tick(FPS)
+            print(round(CLOCK.get_fps()))
     
 if __name__ == "__main__":
-    game = Game(screen, 3)
+    game = Game(screen, 2, showAns = True)
     game.run()
