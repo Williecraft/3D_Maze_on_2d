@@ -89,7 +89,7 @@ class Game:
                 y = self.mid[1]+int(z*SCALE-self.cPos[2])
                 
                 if (0 <= x < SCREEN_WIDTH and 0 <= y < SCREEN_HEIGHT):
-                    if self.maze.path[pArray] > 0:
+                    if self.showAns and self.maze.path[pArray] > 0:
                         screen_array[x, y:y+SCALE] = 2
                     else:
                         screen_array[x, y:y+SCALE] = self.maze.array[pArray]
@@ -190,8 +190,8 @@ class Game:
             
             pg.display.update()
             CLOCK.tick(FPS)
-            print(round(CLOCK.get_fps()))
+            # print(round(CLOCK.get_fps()))
     
 if __name__ == "__main__":
-    game = Game(screen, 2, showAns = True)
+    game = Game(screen, 3, showAns = True)
     game.run()
