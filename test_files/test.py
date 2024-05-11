@@ -1,8 +1,3 @@
-from datetime import datetime
+a = 1
 
-start = datetime.now()
-
-while True:
-    now = datetime.now()
-    times = now-start
-    print(repr(times))
+print(f"{a:02d}")
