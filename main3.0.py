@@ -76,14 +76,12 @@ class Game:
             vector = pos-center
             x = (vector[0]**2+vector[1]**2)**0.5
             
-            if x == 0:
-                pass
-            
-            if x > SCREEN_WIDTH//2: continue
             if self.plane.normal_vector[0]*vector[1]<self.plane.normal_vector[1]*vector[0]: x = -x
             x = self.mid[0]+int(x)
             
-            for z in range(min(self.l, SCREEN_HEIGHT//SCALE)):
+            if x > SCREEN_WIDTH or x < 0: continue
+            
+            for z in range(max(0, (-self.mid[1]+self.cPos[2])//SCALE), min(self.l, ((SCREEN_HEIGHT-self.mid[1])+self.cPos[2])//SCALE)):
                 pArray = (p[0]//SCALE, p[1]//SCALE, z)
                 
                 y = self.mid[1]+int(z*SCALE-self.cPos[2])
@@ -108,30 +106,28 @@ class Game:
     
     def run(self):
         run = True
-        leftclick = False
         while run:
             rotate = 0
             rightclick = False
+            leftclick = False
             for event in pg.event.get():
                 if event.type == pg.QUIT:
                     pg.quit()
                     sys.exit()
                 if event.type == pg.MOUSEWHEEL:
                     if event.y: rotate = event.y
+                if event.type == pg.MOUSEMOTION:
+                    mouse_motion = event.rel
+                    leftclick = bool(event.buttons[0])
                 if event.type == pg.MOUSEBUTTONDOWN:
-                    if event.button == 1: 
-                        leftLastPos = np.array(event.pos)
-                        leftclick = True    
                     if event.button == 3:
-                        rightclick = True            
-                if event.type == pg.MOUSEBUTTONUP:
-                    if event.button == 1: leftclick = False
+                        rightclick = True
                     
                     
             keys_pressed = pg.key.get_pressed()
             w, a, s, d = keys_pressed[pg.K_w],keys_pressed[pg.K_a],keys_pressed[pg.K_s],keys_pressed[pg.K_d]
             
-            if not any((rotate, leftclick)): 
+            if not rotate: 
                 toUP = 0
                 toRIGHT = 0
                 if w: toUP -= 1
@@ -172,14 +168,12 @@ class Game:
                             self.maze.array[tuple(next//SCALE)] = 3
                         
             
-            if not any((w, a, s, d, leftclick)) and rotate:   
+            if not any((w, a, s, d)) and rotate:   
                 self.plane.rotateZ(2*rotate, self.cPos)
                 self.points = self.plane.get_points_on_plane(self.l*SCALE-1)
             
             if leftclick and not rightclick:
-                leftNowPos = np.array(pg.mouse.get_pos())
-                self.mid = self.mid + (leftNowPos-leftLastPos)
-                leftLastPos = leftNowPos
+                self.mid = self.mid + mouse_motion
             
             if rightclick and not leftclick:
                 self.mid = np.array((SCREEN_WIDTH//2, SCREEN_HEIGHT//2))
@@ -193,5 +187,5 @@ class Game:
             # print(round(CLOCK.get_fps()))
     
 if __name__ == "__main__":
-    game = Game(screen, 3, showAns = True)
+    game = Game(screen, 10, showAns = True)
     game.run()

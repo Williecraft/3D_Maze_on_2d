@@ -79,18 +79,44 @@ class Maze:
         self.path[(3, 3, 3)] = 1
         
         passed = np.zeros((size*6+1, size*6+1, size*6+1), dtype=bool)
-        def findpath(now):
-            if self.array[now] == 9: return True
+        findstack = [(3, 3, 3)]
+        retstack = []
+        while findstack:
+            now = findstack.pop()
+            if self.array[now] == 9: break
+            
+            while retstack and retstack[-1][1] > len(findstack):
+                p, _ = retstack.pop()
+                # self.path[p] = 0
+            retstack.append((now, len(findstack)))    
             
             passed[now] = 1
             for d in self.direction:
                 next = tuple((now[i]+d[i] for i in range(len(d))))
                 if [i%3 == 0 for i in next].count(True) >= 2 and all(0 <= i <= size*6 for i in next) and not passed[next] and self.path[next] == 0:
-                    self.path[next] = self.path[now]+1
-                    if findpath(next): return True
-                    self.path[next] = 0
-            return False
-        assert findpath((3, 3, 3)), "No answer"
+                    # self.path[next] = self.path[now]+1
+                    findstack.append(next)
+        # while findstack:
+        #     now = findstack.pop()
+        #     self.path[now] = 0
+        
+        for i, pos in enumerate(retstack):
+            self.path[pos[0]] = i+1
+        
+        pass
+        
+        # def findpath(now):
+        #     if self.array[now] == 9: return True
+            
+        #     passed[now] = 1
+        #     for d in self.direction:
+        #         next = tuple((now[i]+d[i] for i in range(len(d))))
+        #         if [i%3 == 0 for i in next].count(True) >= 2 and all(0 <= i <= size*6 for i in next) and not passed[next] and self.path[next] == 0:
+        #             self.path[next] = self.path[now]+1
+        #             if findpath(next): return True
+        #             self.path[next] = 0
+        #     return False
+        # assert findpath((3, 3, 3)), "No answer"
         
             
                     
@@ -98,7 +124,4 @@ class Maze:
             
     
 if __name__ == '__main__':
-    for i in range(2, 100):
-        start = time.time()
-        Maze(i)
-        print(i, round(time.time()-start, 5), sep='\t')
+    Maze(2)
