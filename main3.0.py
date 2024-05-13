@@ -54,10 +54,11 @@ class Game:
         self.plane = Plane(self.cPos, (10, -10, 0))
         self.points = self.plane.get_points_on_plane(self.l*SCALE-1)
         self.mid = np.array((SCREEN_WIDTH//2, SCREEN_HEIGHT//2))
-        self.quit_button = Button(pg.image.load("resource/quit.png").convert_alpha(), pos=(20, 20), scale=0.01*SCALE)
-        self.start_time = datetime.datetime.now()
+        self.pause_button = Button(pg.image.load("resource/pause.png").convert_alpha(), pos=(30, 30), scale=0.01*SCALE)
         self.font_small = pg.font.Font("Fonts/GenSenRounded-M.ttc", SCALE*3)
         self.font_big = pg.font.Font("Fonts/GenSenRounded-M.ttc", SCALE*7)
+        self.pause_total = datetime.timedelta(0)
+        self.start_time = datetime.datetime.now()
         
     def draw_pic(self, screen_array:np.ndarray, target:int, source_img:pg.Surface):
         draw_array = screen_array.copy()
@@ -109,10 +110,17 @@ class Game:
         v =  v.astype(int)
         return v
     
+    def render_time(self):
+        time = (datetime.datetime.now()-self.start_time-self.pause_total)
+        secs = time.seconds
+        msec = time.microseconds
+        mins, secs = secs//60, secs%60
+        hours, mins = mins//60, mins%60
+        return f"{hours:02d}:{mins:02d}:{secs:02d}.{msec//10000}"
+    
+    # 遊戲主迴圈
     def run(self):
         run = True
-        
-        # 遊戲主迴圈
         while run:
             rotate = 0
             rightclick = False
@@ -163,7 +171,7 @@ class Game:
                                 break
                         
                         if self.maze.array[tuple(next//SCALE)] == 9:
-                            return self.end(datetime.datetime.now()-self.start_time)
+                            return self.end(datetime.datetime.now()-self.start_time-self.pause_total)
                         
                         if self.maze.array[tuple(next//SCALE)] != 1:
                             step += 1
@@ -193,18 +201,15 @@ class Game:
             self.ScreenDraw()
             pg.draw.rect(screen, "red", ((self.mid[0]-SCALE//2, self.mid[1]-SCALE//2, SCALE, SCALE)))
             
-            # 顯示退出按鈕
-            self.quit_button.draw(self.screen)
-            gamequit = self.quit_button.click_test(events)
-            if gamequit and gamequit.button == 1: return 'menu'
+            # 暫停按鈕繪製
+            self.pause_button.draw(self.screen)
+            pause = self.pause_button.click_test(events)
+            if pause and pause.button == 1: 
+                if not self.pause(self.render_time()): return 'menu'
+            
             
             # 顯示時間
-            time = (datetime.datetime.now()-self.start_time)
-            secs = time.seconds
-            msec = time.microseconds
-            mins, secs = secs//60, secs%60
-            hours, mins = mins//60, mins%60
-            timedisplay = self.font_small.render(f"{hours:02d}:{mins:02d}:{secs:02d}.{msec//10000}", True, "black")
+            timedisplay = self.font_small.render(self.render_time(), True, "black")
             self.screen.blit(timedisplay, (10, SCREEN_HEIGHT-timedisplay.get_size()[1]-10))
             
             
@@ -212,7 +217,42 @@ class Game:
             pg.display.update()
             CLOCK.tick(FPS)
             # print(round(CLOCK.get_fps()))
-
+    
+    # 遊戲暫停模式
+    def pause(self, nowtime:str):
+        pause_time = datetime.datetime.now()
+        quit_button = Button(pg.image.load("resource/quit.png").convert_alpha(), pos=(30, 30), scale=0.01*SCALE)
+        start_button = Button(pg.image.load("resource/start.png").convert_alpha(), pos=(SCREEN_WIDTH//2, SCREEN_HEIGHT//2), scale=0.02*SCALE)
+        run = True
+        while run:
+            events = pg.event.get()
+            for event in events:
+                if event.type == pg.QUIT:
+                    pg.quit()
+                    sys.exit()
+                    
+            self.screen.fill('white')
+            
+            # 顯示退出按鈕
+            quit_button.draw(self.screen)
+            gamequit = quit_button.click_test(events)
+            if gamequit and gamequit.button == 1: return False
+            
+            # 顯示開始按鈕
+            start_button.draw(self.screen)
+            restart = start_button.click_test(events)
+            if restart and restart.button == 1:
+                self.pause_total = self.pause_total+datetime.datetime.now()-pause_time
+                return True
+            
+            # 顯示時間
+            timedisplay = self.font_small.render(nowtime, True, "black")
+            self.screen.blit(timedisplay, (10, SCREEN_HEIGHT-timedisplay.get_size()[1]-10))
+            
+            pg.display.update()
+            CLOCK.tick(FPS)
+    
+    # 遊戲結束模式
     def end(self, time:datetime.timedelta):
         self.screen.fill('white')
         pg.display.update()
