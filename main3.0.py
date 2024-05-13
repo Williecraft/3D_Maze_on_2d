@@ -223,6 +223,9 @@ class Game:
         pause_time = datetime.datetime.now()
         quit_button = Button(pg.image.load("resource/quit.png").convert_alpha(), pos=(30, 30), scale=0.01*SCALE)
         start_button = Button(pg.image.load("resource/start.png").convert_alpha(), pos=(SCREEN_WIDTH//2, SCREEN_HEIGHT//2), scale=0.02*SCALE)
+        pause_text = self.font_small.render("遊戲暫停", True, "black")
+        pause_text_rect = pause_text.get_rect()
+        pause_text_rect.center = (SCREEN_WIDTH//2, SCREEN_HEIGHT//2-10*SCALE)
         run = True
         while run:
             events = pg.event.get()
@@ -237,6 +240,8 @@ class Game:
             quit_button.draw(self.screen)
             gamequit = quit_button.click_test(events)
             if gamequit and gamequit.button == 1: return False
+            
+            self.screen.blit(pause_text, pause_text_rect)
             
             # 顯示開始按鈕
             start_button.draw(self.screen)
