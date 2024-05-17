@@ -55,6 +55,7 @@ class Game:
         self.points = self.plane.get_points_on_plane(self.l*SCALE-1)
         self.mid = np.array((SCREEN_WIDTH//2, SCREEN_HEIGHT//2))
         self.pause_button = Button(pg.image.load("resource/pause.png").convert_alpha(), pos=(30, 30), scale=0.01*SCALE)
+        self.hint_button = Button(pg.image.load("resource/hint.png").convert_alpha(), pos=(85, 30), scale=0.01*SCALE)
         self.font_small = pg.font.Font("Fonts/GenSenRounded-M.ttc", SCALE*3)
         self.font_big = pg.font.Font("Fonts/GenSenRounded-M.ttc", SCALE*7)
         self.pause_total = datetime.timedelta(0)
@@ -206,7 +207,12 @@ class Game:
             pause = self.pause_button.click_test(events)
             if pause and pause.button == 1: 
                 if not self.pause(self.render_time()): return 'menu'
-            
+                
+            # 顯示提示按鈕
+            self.hint_button.draw(self.screen)
+            clickHint = self.hint_button.click_test(events)
+            if clickHint and clickHint.button == 1:
+                self.showAns = not self.showAns
             
             # 顯示時間
             timedisplay = self.font_small.render(self.render_time(), True, "black")
@@ -335,14 +341,14 @@ class Menu:
             
     
 if __name__ == "__main__":
-    lvl = 2
+    lvl = 3
     op = "menu"
     while True:
         if op == "menu":
             menu = Menu(screen)
             op = menu.run()
         elif op == "game":
-            game = Game(screen, lvl, showAns = True)
+            game = Game(screen, lvl)
             op = game.run()
         elif op == 'next_lvl':
             lvl += 1
