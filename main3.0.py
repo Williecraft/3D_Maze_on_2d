@@ -1,11 +1,19 @@
-import pygame as pg
+try:
+    import pygame as pg
+    import numpy as np
+    from PIL import Image
+except ModuleNotFoundError:
+    import os
+    os.system(r"pip install -r module_install\requirements.txt")
+    import pygame as pg
+    import numpy as np
+    from PIL import Image
+    
+import sys 
+import datetime   
 from PlaneInSpace import Plane
 from Maze3D import Maze
 from Button import Button
-import sys
-import numpy as np
-import datetime
-from PIL import Image
 
 # 常數設定
 SCALE = 10
