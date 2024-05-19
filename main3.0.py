@@ -11,6 +11,8 @@ from PIL import Image
 SCALE = 10
 SCREEN_WIDTH = 960
 SCREEN_HEIGHT = 540
+MIN_LVL, MAX_LVL = 2, 10
+CAN_SHOW_ANS = False
 
 # 視窗初始化
 pg.init()
@@ -55,9 +57,9 @@ class Game:
         self.points = self.plane.get_points_on_plane(self.l*SCALE-1)
         self.mid = np.array((SCREEN_WIDTH//2, SCREEN_HEIGHT//2))
         self.pause_button = Button(pg.image.load("resource/pause.png").convert_alpha(), pos=(30, 30), scale=0.01*SCALE)
-        self.hint_button = Button(pg.image.load("resource/hint.png").convert_alpha(), pos=(85, 30), scale=0.01*SCALE)
-        self.font_small = pg.font.Font("Fonts/GenSenRounded-M.ttc", SCALE*3)
-        self.font_big = pg.font.Font("Fonts/GenSenRounded-M.ttc", SCALE*7)
+        if CAN_SHOW_ANS: self.hint_button = Button(pg.image.load("resource/hint.png").convert_alpha(), pos=(85, 30), scale=0.01*SCALE)
+        self.font_small = pg.font.Font("Fonts/XiaolaiMonoSC-Regular.ttf", SCALE*3)
+        self.font_big = pg.font.Font("Fonts/XiaolaiMonoSC-Regular.ttf", SCALE*7)
         self.pause_total = datetime.timedelta(0)
         self.start_time = datetime.datetime.now()
         
@@ -120,7 +122,7 @@ class Game:
         return f"{hours:02d}:{mins:02d}:{secs:02d}.{msec//10000}"
     
     # 遊戲主迴圈
-    def run(self):
+    def main(self):
         run = True
         while run:
             rotate = 0
@@ -209,10 +211,11 @@ class Game:
                 if not self.pause(self.render_time()): return 'menu'
                 
             # 顯示提示按鈕
-            self.hint_button.draw(self.screen)
-            clickHint = self.hint_button.click_test(events)
-            if clickHint and clickHint.button == 1:
-                self.showAns = not self.showAns
+            if CAN_SHOW_ANS:
+                self.hint_button.draw(self.screen)
+                clickHint = self.hint_button.click_test(events)
+                if clickHint and clickHint.button == 1:
+                    self.showAns = not self.showAns
             
             # 顯示時間
             timedisplay = self.font_small.render(self.render_time(), True, "black")
@@ -316,8 +319,13 @@ class Menu:
         self.jump_lvl = Button(button_image, pos = (SCREEN_WIDTH//2, 35*SCALE), scale=0.05*SCALE, content="跳至關卡", ret = 'jump')
         self.quit_game = Button(button_image, pos = (SCREEN_WIDTH//2, 45*SCALE), scale=0.05*SCALE, content="退出遊戲", ret = 'quit')
         self.buttons = (self.start_game, self.jump_lvl, self.quit_game)
+        self.font = pg.font.Font("Fonts/XiaolaiMonoSC-Regular.ttf", SCALE*7)
         
-    def run(self):
+    def main(self):
+        title = self.font.render(f"二維上的三維迷宮", True, "black")
+        title_rect = title.get_rect()
+        title_rect.center = (SCREEN_WIDTH//2, 10*SCALE)
+
         run = True
         while run:
             events = pg.event.get()
@@ -327,6 +335,7 @@ class Menu:
                     sys.exit()
             
             self.screen.fill("#FFFFFF")
+            self.screen.blit(title, title_rect)
             
             for b in self.buttons:
                 b.draw(self.screen)
@@ -340,6 +349,61 @@ class Menu:
 class JumpLvl:
     def __init__(self, screen:pg.Surface):
         self.screen = screen
+        button_image = pg.image.load("resource/button.png").convert_alpha()
+
+        self.left = Button(pg.image.load("resource/left_arrow.png").convert_alpha(), pos = (SCREEN_WIDTH//2-20*SCALE, SCREEN_HEIGHT//2), scale=0.03*SCALE, ret = "left")
+        self.right = Button(pg.image.load("resource/right_arrow.png").convert_alpha(), pos = (SCREEN_WIDTH//2+20*SCALE, SCREEN_HEIGHT//2), scale=0.03*SCALE, ret = "right")
+        self.start_game = Button(button_image, pos = (SCREEN_WIDTH//2, SCREEN_HEIGHT//2+20*SCALE), content="開始遊戲", scale=0.05*SCALE, ret = "game")
+        self.back_button = Button(pg.image.load("resource/quit.png").convert_alpha(), pos=(30, 30), scale=0.01*SCALE, ret = "back")
+        self.buttons = (self.left, self.right, self.start_game, self.back_button)
+        
+        self.font = pg.font.Font("Fonts/XiaolaiMonoSC-Regular.ttf", SCALE*6)
+        self.font_back = pg.font.Font("Fonts/XiaolaiMonoSC-Regular.ttf", SCALE*6+SCALE//3)
+        
+        
+        sep = 512/(MAX_LVL-MIN_LVL)
+        l = 0
+        self.colors = []
+        for i in range(MAX_LVL+1):
+            if i < MIN_LVL: self.colors.append(-1)
+            else:
+                R = min(round(l), 255)
+                G = min(512-round(l), 255)
+                self.colors.append( (R, G, 0) )
+                l += sep
+        
+    def main(self):
+        run = True
+        lvl = MIN_LVL
+        while run:
+            events = pg.event.get()
+            for event in events:
+                if event.type == pg.QUIT:
+                    pg.quit()
+                    sys.exit()
+            
+            self.screen.fill("#FFFFFF")
+            
+            lvl_show = self.font.render(str(lvl), True, "black")
+            lvl_show_back = self.font_back.render(str(lvl), True, self.colors[lvl])
+            rectF = lvl_show.get_rect()
+            rectB = lvl_show_back.get_rect()
+            rectF.center = rectB.center = (SCREEN_WIDTH//2, SCREEN_HEIGHT//2)
+            
+            self.screen.blit(lvl_show_back, rectB)
+            self.screen.blit(lvl_show, rectF)
+            
+            for b in self.buttons:
+                b.draw(self.screen)
+                click = b.click_test(events)
+                if click and click.button == 1:
+                    if b.ret == "left": lvl = max(MIN_LVL, lvl-1)
+                    elif b.ret == "right": lvl = min(MAX_LVL, lvl+1)
+                    elif b.ret == "game": return ("game", lvl)
+                    elif b.ret == "back": return ("back", -1)
+                
+            pg.display.update()
+            CLOCK.tick(FPS)
             
     
 if __name__ == "__main__":
@@ -347,15 +411,18 @@ if __name__ == "__main__":
     op = "menu"
     while True:
         if op == "menu":
-            menu = Menu(screen)
-            op = menu.run()
+            current = Menu(screen)
+            op = current.main()
         elif op == "game":
-            game = Game(screen, lvl)
-            op = game.run()
+            current = Game(screen, lvl)
+            op = current.main()
         elif op == "next_lvl":
             lvl += 1
             op = 'game'
         elif op == "jump":
-            
+            current = JumpLvl(screen)
+            op, newLvL = current.main()
+            if op == "back": op = "menu"
+            else: lvl = newLvL
         else: break
             

@@ -10,7 +10,7 @@ class Button:
         
         if content != None:
             img_size = self.image.get_size()
-            font = pg.font.Font("Fonts/GenSenRounded-M.ttc", 100)
+            font = pg.font.Font("Fonts/XiaolaiMonoSC-Regular.ttf", 100)
             text = font.render(content, True, "black")
             text_size = text.get_size()
 
