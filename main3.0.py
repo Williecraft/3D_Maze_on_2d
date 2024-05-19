@@ -337,7 +337,9 @@ class Menu:
             pg.display.update()
             CLOCK.tick(FPS)
                 
-            
+class JumpLvl:
+    def __init__(self, screen:pg.Surface):
+        self.screen = screen
             
     
 if __name__ == "__main__":
@@ -350,8 +352,10 @@ if __name__ == "__main__":
         elif op == "game":
             game = Game(screen, lvl)
             op = game.run()
-        elif op == 'next_lvl':
+        elif op == "next_lvl":
             lvl += 1
             op = 'game'
+        elif op == "jump":
+            
         else: break
             
