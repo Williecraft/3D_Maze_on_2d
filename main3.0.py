@@ -442,7 +442,7 @@ try:
                     
                 pg.display.update()
                 CLOCK.tick(FPS)
-            
+                
     lvl = 3
     op = "menu"
     while True:
@@ -462,6 +462,7 @@ try:
             else: lvl = newLvL
         else: break
 except Exception as err:
-    print(err)
+    pg.quit()
+    print("ERROR:", err)
     import os
     os.system("PAUSE")
