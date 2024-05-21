@@ -5,7 +5,7 @@ try:
         from PIL import Image
     except ModuleNotFoundError:
         import os
-        os.system(r"pip install -r module_install\requirements.txt")
+        os.system(r"pip install -r module_install/requirements.txt")
         import pygame as pg
         import numpy as np
         from PIL import Image
@@ -21,7 +21,7 @@ try:
     SCREEN_WIDTH = 960
     SCREEN_HEIGHT = 540
     MIN_LVL, MAX_LVL = 2, 10
-    CAN_SHOW_ANS = False
+    CAN_SHOW_ANS = True
 
     # 視窗初始化
     pg.init()
