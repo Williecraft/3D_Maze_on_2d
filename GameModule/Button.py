@@ -7,6 +7,9 @@ class Button:
         self.image = pg.transform.scale_by(image, scale)
         self.rect = self.image.get_rect()
         self.rect.center = pos
+        self.button_chosen = False
+        self.sound_chosen = pg.mixer.Sound("resource/Sounds/button-chosen.mp3")
+        self.sound_click = pg.mixer.Sound("resource/Sounds/button-press.mp3")
         
         if content != None:
             img_size = self.image.get_size()
@@ -39,7 +42,14 @@ class Button:
             
     def click_test(self, events:list):
         if self.rect.collidepoint(pg.mouse.get_pos()):
+            if not self.button_chosen:
+                self.button_chosen = True
+                self.sound_chosen.play()
+                
             for event in events:
-                if event.type == pg.MOUSEBUTTONDOWN:
-                    return event
+                if event.type == pg.MOUSEBUTTONDOWN and event.button == 1:
+                    self.sound_click.play()
+                    return True
+        else:
+            self.button_chosen = False
         return False

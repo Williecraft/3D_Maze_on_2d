@@ -29,7 +29,10 @@ try:
     screen = pg.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
     FPS = 30
     CLOCK = pg.time.Clock()
-
+    pg.mixer.music.load("resource/Sounds/PeriTune_Sugar_Sprinkle.mp3")
+    pg.mixer.music.set_volume(0.7)
+    pg.mixer.music.play(-1)
+    
     # 遊戲物件
     class Game:
         # 獲取背景圖片
@@ -73,7 +76,8 @@ try:
             self.points = self.plane.get_points_on_plane(self.l*SCALE-1)
             self.mid = np.array((SCREEN_WIDTH//2, SCREEN_HEIGHT//2))
             self.pause_button = Button(pg.image.load("resource/Pictures/pause.png").convert_alpha(), pos=(30, 30), scale=0.01*SCALE)
-            if CAN_SHOW_ANS: self.hint_button = Button(pg.image.load("resource/Pictures/hint.png").convert_alpha(), pos=(85, 30), scale=0.01*SCALE)
+            if CAN_SHOW_ANS: self.hint_button = Button(pg.image.load("resource/Pictures/hint.png").convert_alpha(), pos=(8.5*SCALE, 3*SCALE), scale=0.01*SCALE)
+            if CAN_SHOW_ANS: self.hint_on_button = Button(pg.image.load("resource/Pictures/hint_on.png").convert_alpha(), pos=(8.5*SCALE, 3*SCALE), scale=0.01*SCALE)
             self.font_small = pg.font.Font("resource/Fonts/XiaolaiMonoSC-Regular.ttf", SCALE*3)
             self.font_big = pg.font.Font("resource/Fonts/XiaolaiMonoSC-Regular.ttf", SCALE*7)
             self.pause_total = datetime.timedelta(0)
@@ -234,15 +238,21 @@ try:
                 # 暫停按鈕繪製
                 self.pause_button.draw(self.screen)
                 pause = self.pause_button.click_test(events)
-                if pause and pause.button == 1: 
+                if pause: 
                     if not self.pause(self.render_time()): return 'menu'
                     
                 # 顯示提示按鈕
                 if CAN_SHOW_ANS:
-                    self.hint_button.draw(self.screen)
-                    clickHint = self.hint_button.click_test(events)
-                    if clickHint and clickHint.button == 1:
-                        self.showAns = not self.showAns
+                    if self.showAns:
+                        self.hint_on_button.draw(self.screen)
+                        clickHint = self.hint_on_button.click_test(events)
+                        if clickHint:
+                            self.showAns = False
+                    else:
+                        self.hint_button.draw(self.screen)
+                        clickHint = self.hint_button.click_test(events)
+                        if clickHint:
+                            self.showAns = True
                 
                 # 顯示時間
                 timedisplay = self.font_small.render(self.render_time(), True, "black")
@@ -275,14 +285,14 @@ try:
                 # 顯示退出按鈕
                 quit_button.draw(self.screen)
                 gamequit = quit_button.click_test(events)
-                if gamequit and gamequit.button == 1: return False
+                if gamequit: return False
                 
                 self.screen.blit(pause_text, pause_text_rect)
                 
                 # 顯示開始按鈕
                 start_button.draw(self.screen)
                 restart = start_button.click_test(events)
-                if restart and restart.button == 1:
+                if restart:
                     self.pause_total = self.pause_total+datetime.datetime.now()-pause_time
                     return True
                 
@@ -336,7 +346,7 @@ try:
                 for b in buttons:
                     b.draw(self.screen)
                     click = b.click_test(events)
-                    if click and click.button == 1:
+                    if click:
                         return b.ret
                 
                 pg.display.update()
@@ -373,7 +383,7 @@ try:
                 for b in self.buttons:
                     b.draw(self.screen)
                     click = b.click_test(events)
-                    if click and click.button == 1:
+                    if click:
                         return b.ret
                     
                 pg.display.update()
@@ -434,15 +444,15 @@ try:
                 for b in self.buttons:
                     b.draw(self.screen)
                     click = b.click_test(events)
-                    if click and click.button == 1:
+                    if click:
                         if b.ret == "left": lvl = max(MIN_LVL, lvl-1)
                         elif b.ret == "right": lvl = min(MAX_LVL, lvl+1)
                         elif b.ret == "game": return ("game", lvl)
                         elif b.ret == "back": return ("back", -1)
-                    
+                
                 pg.display.update()
                 CLOCK.tick(FPS)
-                
+    
     lvl = 3
     op = "menu"
     while True:
