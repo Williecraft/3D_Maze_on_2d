@@ -17,7 +17,7 @@ try:
     from GameModule.Button import Button
 
     # 常數設定
-    SCALE = 10
+    SCALE = 15
     SCREEN_WIDTH = 96*SCALE
     SCREEN_HEIGHT = 54*SCALE
     MIN_LVL, MAX_LVL = 2, 10
