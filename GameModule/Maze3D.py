@@ -87,23 +87,17 @@ class Maze:
             
             while retstack and retstack[-1][1] > len(findstack):
                 p, _ = retstack.pop()
-                # self.path[p] = 0
             retstack.append((now, len(findstack)))    
             
             passed[now] = 1
             for d in self.direction:
                 next = tuple((now[i]+d[i] for i in range(len(d))))
                 if [i%3 == 0 for i in next].count(True) >= 2 and all(0 <= i <= size*6 for i in next) and not passed[next] and self.path[next] == 0:
-                    # self.path[next] = self.path[now]+1
                     findstack.append(next)
-        # while findstack:
-        #     now = findstack.pop()
-        #     self.path[now] = 0
         
         for i, pos in enumerate(retstack):
             self.path[pos[0]] = i+1
-        
-        pass
+
         
         # def findpath(now):
         #     if self.array[now] == 9: return True

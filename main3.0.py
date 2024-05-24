@@ -18,17 +18,18 @@ try:
 
     # 常數設定
     SCALE = 10
-    SCREEN_WIDTH = 960
-    SCREEN_HEIGHT = 540
+    SCREEN_WIDTH = 96*SCALE
+    SCREEN_HEIGHT = 54*SCALE
     MIN_LVL, MAX_LVL = 2, 10
     CAN_SHOW_ANS = True
 
     # 視窗初始化
     pg.init()
     pg.display.set_caption("在二維上的三維迷宮")
-    screen = pg.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
+    SCREEN = pg.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT), flags=pg.HWSURFACE)
     FPS = 30
     CLOCK = pg.time.Clock()
+    
     pg.mixer.music.load("resource/Sounds/PeriTune_Sugar_Sprinkle.mp3")
     pg.mixer.music.set_volume(0.7)
     pg.mixer.music.play(-1)
@@ -65,8 +66,7 @@ try:
         grass_img = get_pic("grass_block")
         
         # 初始化遊戲
-        def __init__(self, screen:pg.Surface, lvl:int, showAns:bool = False) -> None:
-            self.screen = screen
+        def __init__(self, lvl:int, showAns:bool = False) -> None:
             self.lvl = lvl
             self.showAns = showAns
             self.l = lvl*6+1
@@ -93,11 +93,11 @@ try:
             mask = pg.mask.from_threshold(surf, color=(255, 255, 255, 255), threshold=(1, 1, 1, 255))
             
             img = mask.to_surface(setsurface=source_img, unsetcolor=(0, 0, 0, 0)).convert_alpha()
-            self.screen.blit(img, (0, 0))
+            SCREEN.blit(img, (0, 0))
         
         # 畫面繪製方法
         def ScreenDraw(self):  
-            self.screen.fill("white")
+            SCREEN.fill("white")
             screen_array = np.full((SCREEN_WIDTH, SCREEN_HEIGHT), fill_value=-1,dtype='int16')
             
             center = np.array(self.cPos[:2])
@@ -233,10 +233,10 @@ try:
                     
                 # 畫面繪製
                 self.ScreenDraw()
-                pg.draw.rect(screen, "red", ((self.mid[0]-SCALE//2, self.mid[1]-SCALE//2, SCALE, SCALE)))
+                pg.draw.rect(SCREEN, "red", ((self.mid[0]-SCALE//2, self.mid[1]-SCALE//2, SCALE, SCALE)))
                 
                 # 暫停按鈕繪製
-                self.pause_button.draw(self.screen)
+                self.pause_button.draw(SCREEN)
                 pause = self.pause_button.click_test(events)
                 if pause: 
                     if not self.pause(self.render_time()): return 'menu'
@@ -244,19 +244,19 @@ try:
                 # 顯示提示按鈕
                 if CAN_SHOW_ANS:
                     if self.showAns:
-                        self.hint_on_button.draw(self.screen)
+                        self.hint_on_button.draw(SCREEN)
                         clickHint = self.hint_on_button.click_test(events)
                         if clickHint:
                             self.showAns = False
                     else:
-                        self.hint_button.draw(self.screen)
+                        self.hint_button.draw(SCREEN)
                         clickHint = self.hint_button.click_test(events)
                         if clickHint:
                             self.showAns = True
                 
                 # 顯示時間
                 timedisplay = self.font_small.render(self.render_time(), True, "black")
-                self.screen.blit(timedisplay, (10, SCREEN_HEIGHT-timedisplay.get_size()[1]-10))
+                SCREEN.blit(timedisplay, (10, SCREEN_HEIGHT-timedisplay.get_size()[1]-10))
                 
                 
                 # 畫面更新
@@ -267,7 +267,7 @@ try:
         # 遊戲暫停模式
         def pause(self, nowtime:str):
             pause_time = datetime.datetime.now()
-            quit_button = Button(pg.image.load("resource/Pictures/quit.png").convert_alpha(), pos=(30, 30), scale=0.01*SCALE)
+            quit_button = Button(pg.image.load("resource/Pictures/quit.png").convert_alpha(), pos=(3*SCALE, 3*SCALE), scale=0.01*SCALE)
             start_button = Button(pg.image.load("resource/Pictures/start.png").convert_alpha(), pos=(SCREEN_WIDTH//2, SCREEN_HEIGHT//2), scale=0.02*SCALE)
             pause_text = self.font_small.render("遊戲暫停", True, "black")
             pause_text_rect = pause_text.get_rect()
@@ -280,17 +280,17 @@ try:
                         pg.quit()
                         sys.exit()
                         
-                self.screen.fill("white")
+                SCREEN.fill("white")
                 
                 # 顯示退出按鈕
-                quit_button.draw(self.screen)
+                quit_button.draw(SCREEN)
                 gamequit = quit_button.click_test(events)
                 if gamequit: return False
                 
-                self.screen.blit(pause_text, pause_text_rect)
+                SCREEN.blit(pause_text, pause_text_rect)
                 
                 # 顯示開始按鈕
-                start_button.draw(self.screen)
+                start_button.draw(SCREEN)
                 restart = start_button.click_test(events)
                 if restart:
                     self.pause_total = self.pause_total+datetime.datetime.now()-pause_time
@@ -298,14 +298,14 @@ try:
                 
                 # 顯示時間
                 timedisplay = self.font_small.render(nowtime, True, "black")
-                self.screen.blit(timedisplay, (10, SCREEN_HEIGHT-timedisplay.get_size()[1]-10))
+                SCREEN.blit(timedisplay, (10, SCREEN_HEIGHT-timedisplay.get_size()[1]-10))
                 
                 pg.display.update()
                 CLOCK.tick(FPS)
         
         # 遊戲結束模式
         def end(self, time:datetime.timedelta):
-            self.screen.fill("white")
+            SCREEN.fill("white")
             pg.display.update()
             
             # 初始化按鈕
@@ -337,14 +337,14 @@ try:
                         pg.quit()
                         sys.exit()
                         
-                self.screen.fill("white")
+                SCREEN.fill("white")
                 
-                self.screen.blit(congrats, congrats_rect.topleft)
-                self.screen.blit(timedisplay, time_rect.topleft)
+                SCREEN.blit(congrats, congrats_rect.topleft)
+                SCREEN.blit(timedisplay, time_rect.topleft)
                 
                 # 按鈕繪製與偵測
                 for b in buttons:
-                    b.draw(self.screen)
+                    b.draw(SCREEN)
                     click = b.click_test(events)
                     if click:
                         return b.ret
@@ -354,8 +354,7 @@ try:
     
     # 主畫面物件
     class Menu:
-        def __init__(self, screen: pg.Surface):
-            self.screen = screen
+        def __init__(self):
             button_image = pg.image.load("resource/Pictures/button.png").convert_alpha()
             self.start_game = Button(button_image, pos = (SCREEN_WIDTH//2, 25*SCALE), scale=0.05*SCALE, content="開始遊戲", ret = 'game')
             self.jump_lvl = Button(button_image, pos = (SCREEN_WIDTH//2, 35*SCALE), scale=0.05*SCALE, content="跳至關卡", ret = 'jump')
@@ -376,12 +375,12 @@ try:
                         pg.quit()
                         sys.exit()
                 
-                self.screen.fill("white")
-                self.screen.blit(title, title_rect)
+                SCREEN.fill("white")
+                SCREEN.blit(title, title_rect)
                 
                 # 按鈕繪製與偵測
                 for b in self.buttons:
-                    b.draw(self.screen)
+                    b.draw(SCREEN)
                     click = b.click_test(events)
                     if click:
                         return b.ret
@@ -391,16 +390,14 @@ try:
     
     # 關卡選擇物件
     class JumpLvl:
-        def __init__(self, screen:pg.Surface):
-            self.screen = screen
-            
+        def __init__(self):
             # 按鈕初始化
             button_image = pg.image.load("resource/Pictures/button.png").convert_alpha()
 
             self.left = Button(pg.image.load("resource/Pictures/left_arrow.png").convert_alpha(), pos = (SCREEN_WIDTH//2-20*SCALE, SCREEN_HEIGHT//2), scale=0.03*SCALE, ret = "left")
             self.right = Button(pg.image.load("resource/Pictures/right_arrow.png").convert_alpha(), pos = (SCREEN_WIDTH//2+20*SCALE, SCREEN_HEIGHT//2), scale=0.03*SCALE, ret = "right")
             self.start_game = Button(button_image, pos = (SCREEN_WIDTH//2, SCREEN_HEIGHT//2+20*SCALE), content="開始遊戲", scale=0.05*SCALE, ret = "game")
-            self.back_button = Button(pg.image.load("resource/Pictures/quit.png").convert_alpha(), pos=(30, 30), scale=0.01*SCALE, ret = "back")
+            self.back_button = Button(pg.image.load("resource/Pictures/quit.png").convert_alpha(), pos=(3*SCALE, 3*SCALE), scale=0.01*SCALE, ret = "back")
             self.buttons = (self.left, self.right, self.start_game, self.back_button)
             # 字體初始化
             self.font = pg.font.Font("resource/Fonts/XiaolaiMonoSC-Regular.ttf", SCALE*6)
@@ -429,7 +426,7 @@ try:
                         pg.quit()
                         sys.exit()
                 
-                self.screen.fill("white")
+                SCREEN.fill("white")
                 
                 lvl_show = self.font.render(str(lvl), True, "black")
                 lvl_show_back = self.font_back.render(str(lvl), True, self.colors[lvl])
@@ -437,12 +434,12 @@ try:
                 rectB = lvl_show_back.get_rect()
                 rectF.center = rectB.center = (SCREEN_WIDTH//2, SCREEN_HEIGHT//2)
                 
-                self.screen.blit(lvl_show_back, rectB)
-                self.screen.blit(lvl_show, rectF)
+                SCREEN.blit(lvl_show_back, rectB)
+                SCREEN.blit(lvl_show, rectF)
                 
                 # 按鈕繪製與偵測
                 for b in self.buttons:
-                    b.draw(self.screen)
+                    b.draw(SCREEN)
                     click = b.click_test(events)
                     if click:
                         if b.ret == "left": lvl = max(MIN_LVL, lvl-1)
@@ -457,16 +454,16 @@ try:
     op = "menu"
     while True:
         if op == "menu":
-            current = Menu(screen)
+            current = Menu()
             op = current.main()
         elif op == "game":
-            current = Game(screen, lvl)
+            current = Game(lvl)
             op = current.main()
         elif op == "next_lvl":
             lvl += 1
             op = 'game'
         elif op == "jump":
-            current = JumpLvl(screen)
+            current = JumpLvl()
             op, newLvL = current.main()
             if op == "back": op = "menu"
             else: lvl = newLvL
