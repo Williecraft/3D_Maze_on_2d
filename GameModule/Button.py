@@ -3,7 +3,6 @@ import pygame as pg
 class Button:
     def __init__(self, image:pg.Surface = None, pos:tuple = (0, 0), scale:float = 1.0, content:str = None, ret:str = None):
         self.ret = ret
-        self.scale = scale
         self.image = pg.transform.scale_by(image, scale)
         self.rect = self.image.get_rect()
         self.rect.center = pos
