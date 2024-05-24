@@ -75,7 +75,7 @@ try:
             self.plane = Plane(self.cPos, (10, -10, 0))
             self.points = self.plane.get_points_on_plane(self.l*SCALE-1)
             self.mid = np.array((SCREEN_WIDTH//2, SCREEN_HEIGHT//2))
-            self.pause_button = Button(pg.image.load("resource/Pictures/pause.png").convert_alpha(), pos=(30, 30), scale=0.01*SCALE)
+            self.pause_button = Button(pg.image.load("resource/Pictures/pause.png").convert_alpha(), pos=(3*SCALE, 3*SCALE), scale=0.01*SCALE)
             if CAN_SHOW_ANS: self.hint_button = Button(pg.image.load("resource/Pictures/hint.png").convert_alpha(), pos=(8.5*SCALE, 3*SCALE), scale=0.01*SCALE)
             if CAN_SHOW_ANS: self.hint_on_button = Button(pg.image.load("resource/Pictures/hint_on.png").convert_alpha(), pos=(8.5*SCALE, 3*SCALE), scale=0.01*SCALE)
             self.font_small = pg.font.Font("resource/Fonts/XiaolaiMonoSC-Regular.ttf", SCALE*3)
