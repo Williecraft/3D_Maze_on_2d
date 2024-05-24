@@ -5,7 +5,7 @@ try:
         from PIL import Image
     except ModuleNotFoundError:
         import os
-        os.system(r"pip install -r module_install/requirements.txt")
+        os.system("pip install -r module_install/requirements.txt")
         import pygame as pg
         import numpy as np
         from PIL import Image
@@ -141,7 +141,7 @@ try:
             return v
         
         # 獲取當前遊戲時間字串
-        def render_time(self) -> str:
+        def get_time(self) -> str:
             time = (datetime.datetime.now()-self.start_time-self.pause_total)
             secs = time.seconds
             msec = time.microseconds
@@ -239,7 +239,7 @@ try:
                 self.pause_button.draw(SCREEN)
                 pause = self.pause_button.click_test(events)
                 if pause: 
-                    if not self.pause(self.render_time()): return 'menu'
+                    if not self.pause(self.get_time()): return 'menu'
                     
                 # 顯示提示按鈕
                 if CAN_SHOW_ANS:
@@ -255,7 +255,7 @@ try:
                             self.showAns = True
                 
                 # 顯示時間
-                timedisplay = self.font_small.render(self.render_time(), True, "black")
+                timedisplay = self.font_small.render(self.get_time(), True, "black")
                 SCREEN.blit(timedisplay, (10, SCREEN_HEIGHT-timedisplay.get_size()[1]-10))
                 
                 
@@ -460,7 +460,7 @@ try:
             current = Game(lvl)
             op = current.main()
         elif op == "next_lvl":
-            lvl += 1
+            lvl = min(lvl+1, MAX_LVL)
             op = 'game'
         elif op == "jump":
             current = JumpLvl()
@@ -468,6 +468,10 @@ try:
             if op == "back": op = "menu"
             else: lvl = newLvL
         else: break
+        
+    pg.mixer.music.stop()
+    pg.quit()
+    
 except Exception as err:
     pg.quit()
     print("ERROR:", err)
